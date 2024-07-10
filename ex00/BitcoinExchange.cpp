@@ -4,27 +4,23 @@
 #include <iostream>
 #include <algorithm>
 #include <ctime>
+#include <limits>
 
 bool BitcoinExchange::isValidDate(const std::string& date) {
     if (date.length() != 10) return false;
     if (date[4] != '-' || date[7] != '-') return false;
-
     int year = std::atoi(date.substr(0, 4).c_str());
     int month = std::atoi(date.substr(5, 2).c_str());
     int day = std::atoi(date.substr(8, 2).c_str());
-
     if (year < 1 || month < 1 || month > 12 || day < 1 || day > 31) return false;
-
     if (month == 4 || month == 6 || month == 9 || month == 11) {
         return day <= 30;
     } else if (month == 2) {
         bool isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
         return day <= (isLeapYear ? 29 : 28);
     }
-
     return true;
 }
-
 
 BitcoinExchange::BitcoinExchange(const std::string& databaseFile) {
     loadDatabase(databaseFile);
@@ -35,15 +31,12 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
     if (!file.is_open()) {
         throw std::runtime_error("Could not open database file");
     }
-
     std::string line;
-    std::getline(file, line);
-
+    std::getline(file, line); // Skip header line
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         std::string date;
         std::string rate;
-
         if (std::getline(iss, date, ',') && std::getline(iss, rate)) {
             if (isValidDate(date)) {
                 exchangeRates[date] = std::atof(rate.c_str());
@@ -57,27 +50,30 @@ void BitcoinExchange::processInput(const std::string& inputFile) {
     if (!file.is_open()) {
         throw std::runtime_error("Could not open input file");
     }
-
     std::string line;
     std::getline(file, line); // Skip header line
-
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         std::string date;
         std::string valueStr;
-
-        if (std::getline(iss, date, ',') && std::getline(iss, valueStr)) {
+        if (std::getline(iss, date, '|') && std::getline(iss, valueStr)) {
             date.erase(0, date.find_first_not_of(" \t"));
             date.erase(date.find_last_not_of(" \t") + 1);
             valueStr.erase(0, valueStr.find_first_not_of(" \t"));
             valueStr.erase(valueStr.find_last_not_of(" \t") + 1);
-
+            
             if (!isValidDate(date)) {
                 std::cout << "Error: bad input => " << date << std::endl;
                 continue;
             }
-
-            double value = std::atof(valueStr.c_str());
+            
+            char* endptr;
+            double value = std::strtod(valueStr.c_str(), &endptr);
+            if (*endptr != '\0' || value == std::numeric_limits<double>::infinity() || value == -std::numeric_limits<double>::infinity()) {
+                std::cout << "Error: bad input => " << line << std::endl;
+                continue;
+            }
+            
             if (!isValidValue(value)) {
                 if (value < 0) {
                     std::cout << "Error: not a positive number." << std::endl;
@@ -86,7 +82,7 @@ void BitcoinExchange::processInput(const std::string& inputFile) {
                 }
                 continue;
             }
-
+            
             double rate = getExchangeRate(date);
             printExchange(date, value, rate);
         } else {
