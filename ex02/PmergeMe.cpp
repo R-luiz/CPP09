@@ -103,8 +103,8 @@ bool PmergeMe::isPositiveInteger(const std::string& s) const {
 }
 
 void PmergeMe::displayResults() const {
-    for (size_t i = 0; i < original.size(); ++i) {
-        std::cout << original[i] << " ";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        std::cout << vec[i] << " ";
     }
     std::cout << std::endl;
 }
