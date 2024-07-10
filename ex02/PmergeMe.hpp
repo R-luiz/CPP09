@@ -10,12 +10,17 @@ private:
     std::vector<int> vec;
     std::list<int> lst;
     std::vector<int> original;
+	int time_vector;
+	int time_list;
 
 public:
     PmergeMe();
     void parseInput(int argc, char* argv[]);
     void sort();
     void displayResults() const;
+	int getTimeVector() const;
+	int getTimeList() const;
+	int getOriginalSize() const;
 
 private:
     void sortVector();

@@ -31,9 +31,8 @@ void PmergeMe::sort() {
     sortList();
     end = clock();
     double time_list = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000000.0;
-
-    std::cout << "Time to process a range of " << vec.size() << " elements with std::vector : " << time_vector << " us" << std::endl;
-    std::cout << "Time to process a range of " << lst.size() << " elements with std::list : " << time_list << " us" << std::endl;
+	this->time_vector = time_vector;
+	this->time_list = time_list;
 }
 
 void PmergeMe::sortVector() {
@@ -108,15 +107,20 @@ bool PmergeMe::isPositiveInteger(const std::string& s) const {
 }
 
 void PmergeMe::displayResults() const {
-    std::cout << "Before: ";
     for (size_t i = 0; i < original.size(); ++i) {
         std::cout << original[i] << " ";
     }
     std::cout << std::endl;
+}
 
-    std::cout << "After: ";
-    for (size_t i = 0; i < vec.size(); ++i) {
-        std::cout << vec[i] << " ";
-    }
-    std::cout << std::endl;
+int PmergeMe::getTimeVector() const {
+	return time_vector;
+}
+
+int PmergeMe::getTimeList() const {
+	return time_list;
+}
+
+int PmergeMe::getOriginalSize() const {
+	return original.size();
 }
