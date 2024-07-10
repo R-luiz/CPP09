@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <ctime>
 #include <cstdlib>
+#include <utility>
 
 PmergeMe::PmergeMe() {}
 
@@ -47,17 +48,59 @@ template <typename T>
 void PmergeMe::mergeInsertSort(T& container) {
     if (container.size() <= 1) return;
 
-    typename T::iterator mid = container.begin();
-    std::advance(mid, container.size() / 2);
+    // Step 1: Create pairs and sort them
+    std::vector<std::pair<typename T::value_type, typename T::value_type> > pairs;
+    typename T::iterator it = container.begin();
+    while (it != container.end()) {
+        typename T::value_type first = *it++;
+        if (it != container.end()) {
+            typename T::value_type second = *it++;
+            pairs.push_back(std::make_pair(std::min(first, second), std::max(first, second)));
+        } else {
+            pairs.push_back(std::make_pair(first, first));
+        }
+    }
 
-    T left(container.begin(), mid);
-    T right(mid, container.end());
+    // Step 2: Recursively sort the larger elements
+    std::vector<typename T::value_type> largerElements;
+    for (size_t i = 0; i < pairs.size(); ++i) {
+        largerElements.push_back(pairs[i].second);
+    }
+    if (largerElements.size() > 1) {
+        mergeInsertSort(largerElements);
+    }
 
-    mergeInsertSort(left);
-    mergeInsertSort(right);
+    // Step 3: Insert smaller elements using insertion sort with Jacobsthal sequence
+    T result;
+    result.push_back(pairs[0].first);
+    for (size_t i = 0; i < largerElements.size(); ++i) {
+        result.push_back(largerElements[i]);
+    }
 
-    container.clear();
-    std::merge(left.begin(), left.end(), right.begin(), right.end(), std::back_inserter(container));
+    std::vector<size_t> jacobsthal = generateJacobsthalSequence(pairs.size());
+    for (size_t i = 1; i < jacobsthal.size() && jacobsthal[i] <= pairs.size(); ++i) {
+        for (size_t j = jacobsthal[i]; j > jacobsthal[i-1]; --j) {
+            if (j <= pairs.size() && j > 1) {
+                typename T::value_type element = pairs[j-1].first;
+                typename T::iterator insertPos = std::lower_bound(result.begin(), result.end(), element);
+                result.insert(insertPos, element);
+            }
+        }
+    }
+
+    container = result;
+}
+
+std::vector<size_t> PmergeMe::generateJacobsthalSequence(size_t n) {
+    std::vector<size_t> sequence;
+    sequence.push_back(0);
+    sequence.push_back(1);
+    while (sequence.back() < n) {
+        size_t next = sequence[sequence.size() - 1] + 2 * sequence[sequence.size() - 2];
+        if (next > n) break;
+        sequence.push_back(next);
+    }
+    return sequence;
 }
 
 bool PmergeMe::isPositiveInteger(const std::string& s) const {

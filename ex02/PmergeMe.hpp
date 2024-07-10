@@ -22,6 +22,7 @@ private:
     void sortList();
     template <typename T>
     void mergeInsertSort(T& container);
+    std::vector<size_t> generateJacobsthalSequence(size_t n);
     bool isPositiveInteger(const std::string& s) const;
 };
 
