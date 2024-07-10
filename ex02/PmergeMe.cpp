@@ -47,7 +47,6 @@ template <typename T>
 void PmergeMe::mergeInsertSort(T& container) {
     if (container.size() <= 1) return;
 
-    // Step 1: Create pairs and sort them
     std::vector<std::pair<typename T::value_type, typename T::value_type> > pairs;
     typename T::iterator it = container.begin();
     while (it != container.end()) {
@@ -60,7 +59,6 @@ void PmergeMe::mergeInsertSort(T& container) {
         }
     }
 
-    // Step 2: Recursively sort the larger elements
     std::vector<typename T::value_type> largerElements;
     for (size_t i = 0; i < pairs.size(); ++i) {
         largerElements.push_back(pairs[i].second);
@@ -69,7 +67,6 @@ void PmergeMe::mergeInsertSort(T& container) {
         mergeInsertSort(largerElements);
     }
 
-    // Step 3: Insert smaller elements using insertion sort with Jacobsthal sequence
     T result;
     result.push_back(pairs[0].first);
     for (size_t i = 0; i < largerElements.size(); ++i) {
@@ -86,7 +83,6 @@ void PmergeMe::mergeInsertSort(T& container) {
             }
         }
     }
-
     container = result;
 }
 
